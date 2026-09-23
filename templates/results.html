@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}sushi in {{ location }}{% endblock %}
+{% block content %}
+<a href="/" class="back">new search</a>
+<h1 class="results-title">sushi in {{ location }}</h1>
+
+{% if results %}
+<ol class="results">
+  {% for r in results %}
+  <li class="place">
+    <span class="rank">{{ loop.index }}</span>
+    <div class="info">
+      <h2><a href="{{ r.maps_url }}" target="_blank" rel="noopener">{{ r.name }}</a></h2>
+      <p class="address">{{ r.address }}</p>
+      <p class="stats">
+        {{ r.rating }} stars from {{ "{:,}".format(r.reviews) }} reviews
+        {% if r.price %}<span class="price">{{ "$" * r.price }}</span>{% endif %}
+      </p>
+    </div>
+    <span class="score" title="Review-adjusted score">{{ r.score }}</span>
+  </li>
+  {% endfor %}
+</ol>
+{% else %}
+<p class="empty">oh no! there are no rated sushi spots found there. try a larger area, like the whole city.</p>
+{% endif %}
+{% endblock %}

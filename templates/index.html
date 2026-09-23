@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="hero">
+  <h1>hmmm... where's the<br>good sushi?</h1>
+  <p>ranked with ratings & adjusted according to how many people actually reviewed it!</p>
+</header>
+
+<form action="/search" method="get" class="search">
+  <label for="location">city or neighborhood</label>
+  <div class="search-row">
+    <input id="location" name="location" placeholder="montrose, houston" required>
+    <button type="submit">find sushi</button>
+  </div>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+</form>
+{% endblock %}
