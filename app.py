@@ -1,3 +1,7 @@
+import sqlite3
+
+import db
+
 import os
 
 import requests
@@ -9,6 +13,7 @@ load_dotenv()
 API_KEY = os.getenv("GOOGLE_API_KEY")
 
 app = Flask(__name__)
+db.init_db()
 
 SEARCH_URL = "https://places.googleapis.com/v1/places:searchText"
 
@@ -26,7 +31,7 @@ def search_sushi(location):
         "X-Goog-Api-Key": API_KEY,
         # Only request the fields we use (this also keeps costs down)
         "X-Goog-FieldMask": (
-            "places.displayName,places.formattedAddress,places.rating,"
+            "places.id,places.displayName,places.formattedAddress,places.rating,"
             "places.userRatingCount,places.priceLevel,places.googleMapsUri"
         ),
     }
@@ -51,6 +56,7 @@ def score_restaurants(places, trust=50, baseline=4.0):
         reviews = p.get("userRatingCount", 0)
         adjusted = (reviews * p["rating"] + trust * baseline) / (reviews + trust)
         results.append({
+            "place_id": p["id"],
             "name": p["displayName"]["text"],
             "address": p.get("formattedAddress", ""),
             "rating": p["rating"],
@@ -83,8 +89,13 @@ def search():
             "index.html",
             error = "couldn't reach google places. check ur API key & internet connection.",
         )
-
     results = score_restaurants(places)
+
+    try:
+        db.save_results(location, results)
+    except sqlite3.Error as e:
+        print("Couldn't save search:", e)
+
     return render_template("results.html", location=location, results=results)
 
 if __name__ == "__main__":
